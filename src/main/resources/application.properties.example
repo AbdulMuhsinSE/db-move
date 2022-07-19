@@ -1,0 +1,13 @@
+spring.datasource.jdbcUrl=${source.url}
+spring.datasource.username=${source.user}
+spring.datasource.password=${source.password}
+spring.datasource.driver-class-name=oracle.jdbc.driver.OracleDriver
+
+sqlserver.datasource.jdbcUrl=${destination.url}
+sqlserver.datasource.username=${destination.user}
+sqlserver.datasource.password=${destination.password}
+sqlserver.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
+
+spring.batch.jdbc.initialize-schema=never
+files.location=${HOME}/migration
+spring.profiles.active=dev
