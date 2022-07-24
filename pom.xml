@@ -10,9 +10,9 @@
     </parent>
 
 	<groupId>com.grumpyarab</groupId>
-	<artifactId>migration.oracle.sqlserver</artifactId>
+	<artifactId>db.move</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>migration.oracle.sqlserver</name>
+	<name>db-move</name>
 	<description>Db migration batch job from oracle db to sqlserver</description>
 
 	<properties>

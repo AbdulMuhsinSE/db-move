@@ -21,6 +21,8 @@ public class HashmapRowMapper implements RowMapper<HashMap<String, Object>> {
             columnNames.add(rsmd.getColumnLabel(i));
         }
 
+        log.info(rsmd.getTableName(0) + "-" + String.join(",", columnNames));
+
         List<Object> rowData = new ArrayList<>();
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
             rowData.add(rs.getObject(i));
