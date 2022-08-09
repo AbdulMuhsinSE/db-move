@@ -1,6 +1,7 @@
 package com.grumpyarab.db.migration.config.batch;
 
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,7 +53,7 @@ public class BatchConfig {
     private DataSource destination;
 
     @Bean
-    public Job migrateToNewDB() {
+    public Job migrateToNewDB() throws ParseException {
         log.info("Source DB: {}", environment.getProperty("spring.datasource.jdbcUrl"));
         log.info("Source Username: {}", environment.getProperty("spring.datasource.username"));
         log.info("Source Password: {}", environment.getProperty("spring.datasource.password"));

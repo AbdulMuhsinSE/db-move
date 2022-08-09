@@ -3,8 +3,6 @@ package com.grumpyarab.db.migration.processor;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,6 +10,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import com.opencsv.CSVReader;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.item.ItemProcessor;
 
 @Slf4j
@@ -39,13 +38,15 @@ public class RowProcessor implements ItemProcessor<HashMap<String, Object>, Stri
     private String prepareValues(Collection<Object> values) {
         final List<String> valuesString = new ArrayList<>();
         values.forEach( value -> {
-            try {
-                if(value != null) {
-                    Number number = NumberFormat.getInstance().parse(String.valueOf(value));
+            if(value != null) {
+                boolean isNumber = StringUtils.isNumeric(String.valueOf(value));
+                if(isNumber) {
+                    valuesString.add(String.valueOf(value));
+                } else {
+                    valuesString.add("'" + value.toString().replace("'","''") + "'");
                 }
-                valuesString.add(String.valueOf(value));
-            } catch (ParseException e) {
-                valuesString.add("'" + value.toString().replace("'","''") + "'");
+            } else {
+                valuesString.add("NULL");
             }
         });
         return String.join(",", valuesString );
