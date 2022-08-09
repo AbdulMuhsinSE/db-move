@@ -8,6 +8,7 @@ import java.util.List;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.grumpyarab.db.migration.AppConfig;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -19,7 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @Slf4j
 public class ExecuteSqlTasklet implements Tasklet {
     private DataSource destination;
-
+    private AppConfig appConfig;
     private final List<String> tableNames;
 
     @Override
@@ -33,8 +34,12 @@ public class ExecuteSqlTasklet implements Tasklet {
                 throw new RuntimeException(e);
             }
         });
-        log.info("Performing bulk insert to destination DB");
-        jdbcTemplate.batchUpdate(sqlStatements.toArray(new String[0]));
+        if(appConfig.getWriteToDestination() == 1) {
+            log.info("Performing bulk insert to destination DB");
+            jdbcTemplate.batchUpdate(sqlStatements.toArray(new String[0]));
+        } else {
+            log.info("No write to DB due to settings");
+        }
         return RepeatStatus.FINISHED;
     }
 }

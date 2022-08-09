@@ -21,15 +21,10 @@ public class HashmapRowMapper implements RowMapper<HashMap<String, Object>> {
             columnNames.add(rsmd.getColumnLabel(i));
         }
 
-        log.info(rsmd.getTableName(0) + "-" + String.join(",", columnNames));
-
         List<Object> rowData = new ArrayList<>();
         for (int i = 1; i <= rsmd.getColumnCount(); i++) {
             rowData.add(rs.getObject(i));
         }
-
-        log.info(columnNames.toString());
-        log.info(rowData.toString());
 
         for (int i = 0; i < columnNames.size(); i++) {
             if (rowData.get(i) != null ) {
@@ -37,7 +32,6 @@ public class HashmapRowMapper implements RowMapper<HashMap<String, Object>> {
             }
         }
 
-        log.debug("Result Set mapping result: " + result);
         return result;
     }
 }

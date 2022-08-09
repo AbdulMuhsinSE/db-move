@@ -1,15 +1,16 @@
 package com.grumpyarab.db.migration.config.batch;
 
-import com.grumpyarab.db.migration.tasklet.ExecuteSqlTasklet;
-import com.grumpyarab.db.migration.PathUtils;
-import com.grumpyarab.db.migration.mapper.HashmapRowMapper;
-import com.grumpyarab.db.migration.processor.RowProcessor;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.grumpyarab.db.migration.AppConfig;
+import com.grumpyarab.db.migration.mapper.HashmapRowMapper;
+import com.grumpyarab.db.migration.processor.RowProcessor;
+import com.grumpyarab.db.migration.tasklet.ExecuteSqlTasklet;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 
@@ -40,18 +42,27 @@ public class BatchConfig {
     public JobBuilderFactory jobBuilderFactory;
     public StepBuilderFactory stepBuilderFactory;
 
-    public PathUtils pathUtils;
+    private AppConfig appConfig;
     private JobSetup jobSetup;
     private DataSource dataSource;
+
+    private Environment environment;
 
     @Qualifier("destination")
     private DataSource destination;
 
     @Bean
     public Job migrateToNewDB() {
+        log.info("Source DB: {}", environment.getProperty("spring.datasource.jdbcUrl"));
+        log.info("Source Username: {}", environment.getProperty("spring.datasource.username"));
+        log.info("Source Password: {}", environment.getProperty("spring.datasource.password"));
+        log.info("---------------------------------------");
+        log.info("Destination DB: {}", environment.getProperty("sqlserver.datasource.jdbcUrl"));
+        log.info("Destination Username: {}", environment.getProperty("sqlserver.datasource.username"));
+        log.info("Destination Password: {}", environment.getProperty("sqlserver.datasource.password"));
         log.info("Migration Job Started");
         List<Step> steps = jobSetup.getTableNames()
-            .stream().map(this::step).toList();
+            .stream().map(this::step).collect(Collectors.toList());
 
         FlowBuilder<Flow> flowBuilder = new FlowBuilder<>("migration_flow");
         Flow flow = flowBuilder.start(createParallelFlow(steps)).build();
@@ -70,7 +81,7 @@ public class BatchConfig {
             .map(step ->
                 new FlowBuilder<Flow>("flow_" + step.getName())
                     .start(step)
-                    .build()).toList();
+                    .build()).collect(Collectors.toList());
 
         return new FlowBuilder<SimpleFlow>("parallelStepsFlow").split(taskExecutor)
             .add(flows.toArray(new Flow[flows.size()]))
@@ -91,7 +102,7 @@ public class BatchConfig {
 
     public Step writeToDestination(List<String> tableNames) {
         return stepBuilderFactory.get("write")
-            .tasklet(new ExecuteSqlTasklet(destination, tableNames)).build();
+            .tasklet(new ExecuteSqlTasklet(destination, appConfig, tableNames)).build();
     }
 
     public ItemReader<HashMap<String, Object>> itemReader(DataSource source, String tableName) throws SQLException {
@@ -105,7 +116,7 @@ public class BatchConfig {
     }
 
     public RowProcessor processor(String url) {
-        return new RowProcessor(url, pathUtils.getBasePath());
+        return new RowProcessor(url, appConfig.getBasePath());
     }
 
     public FlatFileItemWriter<String> itemWriter(String tableName) {

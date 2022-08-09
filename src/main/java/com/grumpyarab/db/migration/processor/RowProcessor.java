@@ -22,7 +22,6 @@ public class RowProcessor implements ItemProcessor<HashMap<String, Object>, Stri
 
     @Override
     public String process(final HashMap<String, Object> source) throws Exception {
-        log.info("Pulling from base path: " + basePath + url + ".csv");
         Path path = Paths.get(basePath , url+".csv");
         CSVReader csvReader = new CSVReader(Files.newBufferedReader(path));
         List<String[]> mapping = csvReader.readAll();

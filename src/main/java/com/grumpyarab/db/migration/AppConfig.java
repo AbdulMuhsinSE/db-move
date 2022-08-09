@@ -8,7 +8,10 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 @ComponentScan(basePackages = {"com.grumpyarab"})
 @Configuration
-public class PathUtils {
+public class AppConfig {
     @Value("${files.location}")
     private String basePath;
+
+    @Value("${write.to.destination}")
+    private int writeToDestination;
 }
